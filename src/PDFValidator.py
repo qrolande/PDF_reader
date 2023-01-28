@@ -1,26 +1,32 @@
 import fitz
+from pdf2image import convert_from_path
 
 
 class PDFValidator():
 	filename = ''
 	new_dict = {}
+	parsed_dict = {}
 
 	def __init__(self, filename):
 		self.filename = filename
 		assert '.pdf' in self.filename, "PDF file is needed"
+		print()
 		print("File added successfully!")
 
-	def parser(self):
+	def pdf_reader(self):
 		text = {}
-		mydict = {}
 		with fitz.open(self.filename) as doc:
 			for page in doc:
 				text[page] = page.get_text()
-				mydict = str(text[page]).split('\n')
+				self.new_dict = str(text[page]).split('\n')
 
+		return self.new_dict
+
+	def parser(self, dictionary):
 		temp = []
-		for ind in range(len(mydict)):
-			temp.append(mydict[ind].split(':'))
+
+		for ind in range(len(dictionary)):
+			temp.append(dictionary[ind].split(':'))
 
 		key = []
 		value = []
@@ -35,8 +41,12 @@ class PDFValidator():
 				else:
 					value.append(temp[i][y])
 
-		self.new_dict = dict(zip(key, value))
+		self.parsed_dict = dict(zip(key, value))
 		print("File parsed!")
 
-		return self.new_dict
+		return self.parsed_dict
 
+	def pdf_to_image(self):
+		pages = convert_from_path(self.filename)
+		for i, page in enumerate(pages):
+			page.save('SecondPDF.jpg', 'JPEG')
